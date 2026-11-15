@@ -1,0 +1,12 @@
+# Environments and tooling
+.venv/
+__pycache__/
+*.egg-info/
+.pytest_cache/
+.ipynb_checkpoints/
+
+# Rebuildable or downloaded: the dataset, its split and images, Iconclass texts, indexes
+data/
+cache/
+
+# runs/ and results/ are research data and are committed

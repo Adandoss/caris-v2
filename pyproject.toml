@@ -1,0 +1,30 @@
+[build-system]
+requires = ["setuptools>=69"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "caris"
+version = "2.0.0"
+description = "Iconclass codes and similar artworks for an image, from a local vision-language model"
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "iconclass==0.28",
+    "numpy>=1.26",
+    "ollama>=0.6",
+    "pydantic>=2.7",
+    "tqdm",
+]
+
+[project.optional-dependencies]
+analysis = ["jupyter", "matplotlib", "pandas"]
+dev = ["pytest"]
+
+[project.scripts]
+caris = "caris.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+caris = ["prompts/*.txt"]
