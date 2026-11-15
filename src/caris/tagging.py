@@ -48,9 +48,17 @@ def read_run(path: Path) -> tuple[dict, dict[str, dict]]:
     """The run's header, and its line for each image. Every complete line ends in a newline,
     so a last line without one was cut off mid-write and is left out."""
     with path.open(encoding="utf-8", newline="") as f:
-        header = json.loads(next(f))["header"]
-        lines = [json.loads(line) for line in f if line.endswith("\n")]
+        header = _parse_line(path, 1, next(f))["header"]
+        lines = [_parse_line(path, number, line) for number, line in enumerate(f, 2) if line.endswith("\n")]
         return header, {line["image"]: line for line in lines}
+
+
+def _parse_line(path: Path, number: int, line: str) -> dict:
+    try:
+        return json.loads(line)
+    except json.JSONDecodeError as error:
+        problem = f"{error.msg.removesuffix(' at')} at column {error.colno}"  # json's messages may end in "at"
+        raise RuntimeError(f"Line {number} of {path} is not valid JSON ({problem}).") from error
 
 
 def tag_split(tagging: TaggingSettings, split: Split, limit: int | None = None) -> Path:

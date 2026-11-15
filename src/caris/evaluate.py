@@ -120,10 +120,13 @@ def sweep(experiment: Experiment, split: Split, thresholds: list, top_ks: list) 
 
 def paired_difference(first: dict, second: dict, metric: str) -> dict:
     """How much the second results file beats the first on a per-image metric, over the images
-    both evaluated, with a 95% bootstrap interval. If the interval spans 0, the difference isn't clear."""
+    both evaluated, with a 95% bootstrap interval. If the interval spans 0, the difference isn't clear.
+    Files on different splits have no images in common, so comparing them is an error."""
     a = {entry["image"]: entry["metrics"][metric] for entry in first["per_image"]}
     b = {entry["image"]: entry["metrics"][metric] for entry in second["per_image"]}
     differences = [b[image] - a[image] for image in sorted(a.keys() & b.keys())]
+    if not differences:
+        raise ValueError("The two results files have no images in common. Compare two files on the same split.")
     return {"images": len(differences), "mean": statistics.fmean(differences), "ci95": interval(differences)}
 
 

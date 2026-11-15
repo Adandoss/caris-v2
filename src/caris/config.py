@@ -77,5 +77,8 @@ class Experiment(Section):
 def load_experiment(path: Path) -> Experiment:
     """Reads an experiment file. The experiment is named after the file."""
     with path.open("rb") as f:
-        settings = tomllib.load(f)
+        try:
+            settings = tomllib.load(f)
+        except tomllib.TOMLDecodeError as error:
+            raise RuntimeError(f"{path} is not valid TOML: {error}") from error
     return Experiment.model_validate({**settings, "name": path.stem})

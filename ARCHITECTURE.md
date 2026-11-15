@@ -121,7 +121,7 @@ The prompts sit inside the package, so an installed copy, such as the one on Kag
 
 - `reply` is the model's raw text, and `answer` is that text validated against the schema.
 - Running `caris tag` again with the same experiment resumes the run. It first checks that the model digest and the prompt text haven't changed, then tags only the images that have no line yet.
-- Every complete line ends in a newline. A last line without one was cut off mid-write when a session ended. Reading the run leaves it out, and resuming removes it and tags its image again.
+- Every complete line ends in a newline. A last line without one was cut off mid-write when a session ended. Reading the run leaves it out, and resuming removes it and tags its image again. Any other line that isn't valid JSON is an error that names the line.
 - Any error from Ollama stops the run. Only a reply that fails validation is recorded as a failed image.
 
 **Index:** `cache/indexes/<embedding-model>__<text-variant>.npz` holds:
@@ -320,7 +320,7 @@ Equal scores rank in code order, so the selection is reproducible.
   - hierarchical hP, hR and hF1, where each code is expanded with its ancestors (Kiritchenko et al., 2006);
   - ranking metrics (P@k, R@k, hit@k, MRR, AP) over each image's full ranking, which judge the score order independently of any threshold.
 - **Averaging.** Per-image means come with 95% bootstrap intervals. Pooled precision and recall count all codes at once, and stay meaningful when a strict threshold leaves some images with no codes (whose per-image precision is 0).
-- **Comparisons.** Systems are compared by whole curves, or at operating points chosen on `val`, with paired bootstrap intervals (`evaluate.paired_difference`).
+- **Comparisons.** Systems are compared by whole curves, or at operating points chosen on `val`, with paired bootstrap intervals over the images both evaluated (`evaluate.paired_difference`). So the two results files must be on the same split.
 - **Summaries.** Every results file also reports the recall ceiling and a breakdown by top-level Iconclass branch.
 
 **Why.**
