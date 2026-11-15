@@ -1,6 +1,7 @@
 """The caris command: split, index, tag, sweep, evaluate and predict."""
 
 import argparse
+import math
 import sys
 from pathlib import Path
 
@@ -108,7 +109,8 @@ def _parser() -> argparse.ArgumentParser:
 
 
 def _numbers(convert):
-    """An argparse type for a comma-separated list, where START:STOP:STEP is a range and none is None."""
+    """An argparse type for a comma-separated list, where none is None and START:STOP:STEP is a
+    range. A range never goes past STOP, and includes it when the steps land on it."""
 
     def parse(text: str) -> list:
         values = []
@@ -116,8 +118,12 @@ def _numbers(convert):
             if item.strip() == "none":
                 values.append(None)
             elif ":" in item:
-                start, stop, step = map(float, item.split(":"))
-                values += [round(start + i * step, 4) for i in range(round((stop - start) / step) + 1)]
+                start, stop, step = map(convert, item.split(":"))
+                if step <= 0 or stop < start:
+                    raise argparse.ArgumentTypeError(f"{item.strip()}: STEP must be positive and STOP at least START")
+                # The margin keeps STOP when float division lands just below a whole number of steps.
+                steps = math.floor((stop - start) / step + 1e-9)
+                values += [round(start + i * step, 4) for i in range(steps + 1)]
             else:
                 values.append(convert(item))
         return values

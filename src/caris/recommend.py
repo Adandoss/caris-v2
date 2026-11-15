@@ -1,11 +1,19 @@
-"""The three recommenders, ported unchanged from the previous system.
+"""The three recommenders of the previous system, with two fixes.
 
 Each compares an image's predicted codes with the codes of every artwork in a collection,
 and returns its best-scoring artwork, or None when no artwork shares anything with the
-query. Codes are compared without their bracketed part: 25F23(LION) is read as 25F23.
+query. Codes are compared without their bracketed text: 25F23(LION) is read as 25F23, and
+11H(PAUL)6 as 11H6. Each distinct query code counts once.
+
+The previous system cut every code at its first bracket, so 11H(PAUL)6, the martyrdom of
+Paul, became 11H, any male saint. It also counted a query code as often as it occurred
+after that cut, so several saints' codes added 11H several times.
 """
 
 import math
+import re
+
+BRACKETED = re.compile(r"\([^()]*\)")
 
 
 def recommend(collection: dict[str, list[str]], codes: list[str], idf_impact: float = 1.0) -> dict[str, str | None]:
@@ -19,7 +27,7 @@ def recommend(collection: dict[str, list[str]], codes: list[str], idf_impact: fl
 
 def by_prefix(collection, codes):
     """Each query code adds its best similarity to the artwork's codes."""
-    query_codes = [_base_code(code) for code in codes]
+    query_codes = _query_codes(codes)
     scores = {}
     for artwork, artwork_codes in collection.items():
         artwork_codes = [_base_code(code) for code in artwork_codes]
@@ -43,12 +51,11 @@ def idf_scores(collection) -> dict[str, float]:
 def by_idf(collection, codes, idf_impact=1.0):
     """Each query code that the artwork has adds its IDF, raised to idf_impact."""
     idf = idf_scores(collection)
+    query_codes = _query_codes(codes)
     scores = {}
     for artwork, artwork_codes in collection.items():
         artwork_codes = {_base_code(code) for code in artwork_codes}
-        scores[artwork] = sum(
-            idf.get(code, 0) ** idf_impact for code in map(_base_code, codes) if code in artwork_codes
-        )
+        scores[artwork] = sum(idf.get(code, 0) ** idf_impact for code in query_codes if code in artwork_codes)
     return _best(scores)
 
 
@@ -63,8 +70,17 @@ def by_jaccard(collection, codes):
     return _best(scores)
 
 
+def _query_codes(codes):
+    """The query's distinct base codes, in the order they first occur. Summing in one fixed order
+    gives artworks that share the same codes exactly equal scores, so ties go to collection order."""
+    return list(dict.fromkeys(map(_base_code, codes)))
+
+
 def _base_code(code):
-    return code.split("(")[0].strip()
+    """The code without its bracketed text: 25F23(LION) gives 25F23, and 11H(PAUL)6 gives 11H6."""
+    while (shorter := BRACKETED.sub("", code)) != code:  # repeated, for brackets inside brackets
+        code = shorter
+    return code.split("(")[0].strip()  # a bracket that is never closed runs to the end
 
 
 def _code_similarity(query, code):

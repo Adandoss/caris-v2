@@ -26,7 +26,7 @@ The same code base is also a test bench. Each stage can be varied on its own (VL
 | Download of the English Iconclass texts | Moved into `codes.py`, downloaded fresh |
 | The Gemma keyword prompt | Kept as `keywords_v0`; its JSON version is `tags_v1` |
 | Evaluation integrity rules | Failed and untagged images are listed and left out of the metrics; any Ollama error stops a tag run |
-| The three recommenders: prefix similarity, IDF and Jaccard | Ported unchanged into `recommend.py` (D9) |
+| The three recommenders: prefix similarity, IDF and Jaccard | Ported into `recommend.py`, with two fixes to how codes are compared (D9) |
 
 ### Left behind
 
@@ -121,6 +121,7 @@ The prompts sit inside the package, so an installed copy, such as the one on Kag
 
 - `reply` is the model's raw text, and `answer` is that text validated against the schema.
 - Running `caris tag` again with the same experiment resumes the run. It first checks that the model digest and the prompt text haven't changed, then tags only the images that have no line yet.
+- Every complete line ends in a newline. A last line without one was cut off mid-write when a session ended. Reading the run leaves it out, and resuming removes it and tags its image again.
 - Any error from Ollama stops the run. Only a reply that fails validation is recorded as a failed image.
 
 **Index:** `cache/indexes/<embedding-model>__<text-variant>.npz` holds:
@@ -190,7 +191,7 @@ caris evaluate experiments/x.toml                # results/x__test.json
 caris predict  painting.jpg --experiment experiments/x.toml
 ```
 
-`caris sweep` tries every pair from `--thresholds` and `--top-k`. Both take comma-separated lists in which `START:STOP:STEP` is a range and `none` leaves that part of the rule out. The defaults are `none,0.55:0.95:0.01` and `none,1,2,5,10,20,50`, so one table holds three kinds of rule: top-k only, a threshold only, and a threshold with a cap.
+`caris sweep` tries every pair from `--thresholds` and `--top-k`. Both take comma-separated lists in which `START:STOP:STEP` is a range and `none` leaves that part of the rule out. A range never goes past `STOP`, and includes it when the steps land on it. The defaults are `none,0.55:0.95:0.01` and `none,1,2,5,10,20,50`, so one table holds three kinds of rule: top-k only, a threshold only, and a threshold with a cap.
 
 ## 4. Key decisions
 
@@ -204,7 +205,7 @@ caris predict  painting.jpg --experiment experiments/x.toml
 | D6 | Structured, versioned VLM output | Validated replies, and room for richer labels |
 | D7 | Experiments as files, keyed caches, recorded provenance | Compare by changing one section; explain every number |
 | D8 | Choose on val, report on test | Fair operating points and comparable curves |
-| D9 | Three recommenders, ported unchanged | Three different ideas of similarity, kept from the previous system |
+| D9 | Three recommenders, ported with two fixes | Three different ideas of similarity, kept from the previous system |
 | D10 | Fresh start in a new repository | Every number comes from a run with full provenance |
 | D11 | Kaggle runs only the tagging stage | Free GPU hours go to the only stage that needs them |
 | D12 | Small dependency set | Five runtime dependencies |
@@ -336,9 +337,9 @@ Equal scores rank in code order, so the selection is reproducible.
 
 **Consequences.** Each VLM is tagged on both `val` and `test`, which adds 40% to its GPU cost.
 
-### D9. Three recommenders, ported unchanged
+### D9. Three recommenders, ported with two fixes
 
-**Decision.** The previous system's three recommenders stay, with the same scoring and the same output. Each one compares the predicted codes with the codes of every artwork in the collection, which is the `train` labels. Each first drops the bracketed part of a code, so `25F23(LION)` becomes `25F23`.
+**Decision.** The previous system's three recommenders stay, with the same scoring and the same output. Each one compares the predicted codes with the codes of every artwork in the collection, which is the `train` labels. Each first drops the bracketed text of a code, so `25F23(LION)` becomes `25F23` and `11H(PAUL)6` becomes `11H6`, and then counts each distinct predicted code once.
 
 | Recommender | How an artwork scores |
 |---|---|
@@ -356,7 +357,10 @@ Each recommender returns its best-scoring artwork, or none when no artwork share
 Keeping all three keeps that choice open.
 
 **Consequences.**
-- `recommend.py` keeps the previous scoring as it is. The only change is that the collection is passed in, loaded once, instead of being read from a file on every call, which doesn't change any result.
+- `recommend.py` keeps the previous scoring formulas. Three things changed:
+  - The previous code cut each code at its first bracket, so `11H(PAUL)6`, the martyrdom of Paul, became `11H`, any male saint. That hit 14,783 of the 40,712 indexed codes, and 5,902 of them became plain `11H`. Now only the bracketed text goes.
+  - The previous prefix and IDF recommenders counted a code as often as it occurred after that cut, so several saints' codes added `11H` several times. Now each distinct code counts once, as it already did in Jaccard.
+  - The collection is passed in, loaded once, instead of being read from a file on every call. That doesn't change any result.
 - Recommendation isn't among the research goals, so the three recommenders aren't evaluated for now. A later evaluation could check how well each one's pick matches the query's true codes.
 
 ### D10. Fresh start in a new repository
@@ -380,7 +384,9 @@ Code is ported only where it is correct and needed (§2). The previous repositor
 - installs Ollama, pinned to the version used locally, and pulls the VLM;
 - clones and installs this repository;
 - runs `caris tag` on the `val` and `test` images, uploaded once as a private Kaggle dataset that `CARIS_DATA` points to;
-- keeps the tag runs as notebook output.
+- stops tagging `TAGGING_HOURS` after the start, so the version ends, and keeps its output, before Kaggle ends the session;
+- keeps the tag runs as notebook output;
+- carries on from an earlier version, when `PREVIOUS` points to that version's output added as an input.
 
 Index building, retrieval, evaluation and recommendation run locally.
 
@@ -388,7 +394,7 @@ Index building, retrieval, evaluation and recommendation run locally.
 
 **Consequences.**
 - At the local speed of ~23 s per image, one VLM costs about 6.4 h on `test` plus 2.6 h on `val`, so roughly three VLMs would fit in a weekly quota. On Kaggle it may cost less.
-- Tag runs are append-only and resume after a session ends.
+- Tag runs are append-only. Each version starts with an empty working folder, so a run that one version didn't finish carries on only when the next version copies it from the earlier output.
 - Time 20 images on Kaggle before committing to a full run.
 
 ### D12. Small dependency set

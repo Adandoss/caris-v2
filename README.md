@@ -68,7 +68,8 @@ So one table holds the top-k curve, the threshold curve and the capped threshold
 
 1. Upload `data/splits/` and `data/images/` as a private Kaggle dataset.
 2. Follow the steps at the top of the notebook.
-3. Copy the finished tag runs into `runs/tags/` here.
+3. Tagging stops after `TAGGING_HOURS`, so the version keeps its output. If a tag run isn't done by then, the notebook says so, and its top explains how a new version carries on from that output.
+4. Copy the finished tag runs into `runs/tags/` here.
 
 If the data lives anywhere other than `./data`, set `CARIS_DATA` to its folder.
 

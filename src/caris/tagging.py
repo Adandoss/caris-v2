@@ -2,8 +2,8 @@
 
 All answers of one tagging setup on one split form a tag run: a JSONL file whose first line
 is a header describing what produced it, followed by one line per image. A run picks up
-where it stopped, so a Kaggle session that ends early loses nothing. Any error from Ollama
-stops the run; only a reply that fails validation is recorded as a failed image.
+where it stopped, so a session that ends early loses at most the image it was on. Any error
+from Ollama stops the run; only a reply that fails validation is recorded as a failed image.
 """
 
 import json
@@ -45,10 +45,11 @@ def run_path(tagging: TaggingSettings, split: Split) -> Path:
 
 
 def read_run(path: Path) -> tuple[dict, dict[str, dict]]:
-    """The run's header, and its line for each image."""
-    with path.open(encoding="utf-8") as f:
+    """The run's header, and its line for each image. Every complete line ends in a newline,
+    so a last line without one was cut off mid-write and is left out."""
+    with path.open(encoding="utf-8", newline="") as f:
         header = json.loads(next(f))["header"]
-        lines = (json.loads(line) for line in f)
+        lines = [json.loads(line) for line in f if line.endswith("\n")]
         return header, {line["image"]: line for line in lines}
 
 
@@ -59,6 +60,7 @@ def tag_split(tagging: TaggingSettings, split: Split, limit: int | None = None) 
     if path.exists():
         started, done = read_run(path)
         _check_same_setup(started, header, path)
+        _drop_cut_off_line(path)
     else:
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(json.dumps({"header": header}) + "\n", encoding="utf-8")
@@ -91,6 +93,17 @@ def _header(tagging: TaggingSettings, split: Split) -> dict:
         "prompt_hash": provenance.text_hash(prompt_text(tagging.prompt)),
         **provenance.stamp(),
     }
+
+
+def _drop_cut_off_line(path: Path):
+    """Removes a last line cut off mid-write, so that the next line starts on a line of its own.
+    read_run has already left that line out, so its image gets tagged again."""
+    content = path.read_bytes()
+    complete = content.rfind(b"\n") + 1
+    if complete < len(content):
+        with path.open("r+b") as f:
+            f.truncate(complete)
+        print(f"Note: the last line of {path.name} was cut off mid-write. Its image will be tagged again.")
 
 
 def _check_same_setup(started: dict, now: dict, path: Path):
