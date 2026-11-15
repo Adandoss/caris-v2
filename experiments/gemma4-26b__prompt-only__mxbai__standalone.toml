@@ -1,0 +1,22 @@
+# The ablation for enforced structure: the old prompt asks for a comma-separated list and
+# nothing is enforced. Compare with gemma4-26b__mxbai__standalone, which differs only in
+# how the answer is requested.
+
+[data]
+split = "test"
+
+[tagging]
+model = "gemma4:26b"
+prompt = "keywords_v0"
+schema = "none"
+temperature = 0.0
+seed = 42
+think = false  # reasoning before answering: much slower; compare it as its own experiment
+
+[embedding]
+model = "mxbai-embed-large"
+text = "standalone"
+query_prefix = "Represent this sentence for searching relevant passages: "
+
+[selection]
+top_k = 20
