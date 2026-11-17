@@ -43,7 +43,7 @@ class TaggingSettings(Section):
 
 class EmbeddingSettings(Section):
     model: str = "mxbai-embed-large"
-    text: Literal["standalone", "hierarchical"] = "standalone"
+    text: Literal["standalone", "parent", "hierarchical"] = "standalone"
     query_prefix: str = ""
     document_prefix: str = ""
 

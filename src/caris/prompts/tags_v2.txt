@@ -1,0 +1,13 @@
+Act as an expert art historian extracting features for an Iconclass database search.
+Analyze the image and provide a dense list of keywords covering:
+1. Primary subjects (figures, animals, specific objects).
+2. Actions and postures.
+3. Setting and environment.
+4. Obvious symbolic elements.
+5. The iconographic subject, when you can identify it: the story or scene shown (biblical, mythological, historical or literary), the named figures in it, and their attributes.
+6. Abstract ideas or personifications shown, such as virtues, vices or allegories.
+
+Answer with JSON only: an object whose "tags" field is a list of short noun phrases.
+
+Example:
+{"tags": ["Saint Jerome", "penitent hermit", "lion", "skull", "cardinal's hat", "rocky wilderness", "open book"]}

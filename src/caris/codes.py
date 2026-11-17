@@ -51,7 +51,9 @@ def lineage(code: str) -> list[str]:
 
 
 def document_text(code: str, variant: str) -> str:
-    """What gets embedded for a code: its own text, or every text along its lineage."""
+    """What gets embedded for a code: its own text, its parent's text and its own, or every
+    text along its lineage."""
     if variant == "standalone":
         return texts()[code]
-    return " → ".join(texts()[step] for step in lineage(code) if step in texts())
+    steps = lineage(code)[-2:] if variant == "parent" else lineage(code)
+    return " → ".join(texts()[step] for step in steps if step in texts())

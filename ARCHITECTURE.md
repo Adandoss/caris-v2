@@ -90,7 +90,7 @@ CARIS_v2/
     ├── provenance.py         model digests, Ollama version, hashes, time and machine
     ├── codes.py              Iconclass texts and tree: lineage(), document_text(code, variant)
     ├── data.py               the three-way split; extracts only the images that get tagged
-    ├── prompts/              tags_v1.txt (JSON), keywords_v0.txt (comma list, for the ablation)
+    ├── prompts/              tags_v1.txt (JSON), tags_v2.txt (JSON, iconographic), keywords_v0.txt (comma list, for the ablation)
     ├── schemas.py            VLM output schemas; each answer turns into (text, weight) queries
     ├── tagging.py            image → validated answer via Ollama; resumable tag runs
     ├── embedding.py          Ollama embeddings with per-model prefixes; query cache
@@ -164,7 +164,7 @@ think = false                   # reasoning before answering; see D3
 
 [embedding]
 model = "mxbai-embed-large"
-text = "hierarchical"           # standalone | hierarchical
+text = "hierarchical"           # standalone | parent | hierarchical
 query_prefix = "Represent this sentence for searching relevant passages: "
 
 [selection]
@@ -426,9 +426,10 @@ Index building, retrieval, evaluation and recommendation run locally.
 | Pre-iconographical / iconographical labels, salience, relations | a new schema version; salience becomes a query weight | one tag run per schema |
 | Hierarchy-aware metrics | `metrics.py` | new functions, e.g. LCA-based measures (Kosmopoulos et al., 2015) |
 
-The two code-text variants, for code `14A1`:
+The three code-text variants, for code `14A1`:
 
 - `standalone`: `astrologer observing the heavens`
+- `parent`: `astrologer at work → astrologer observing the heavens`
 - `hierarchical`: `Religion and Magic → astrology → astrologer at work → astrologer observing the heavens`
 
 The path (`1` → `14` → `14A` → `14A1`) comes from the `iconclass` tree, and each step's text from the English Iconclass texts. The tree is older than some of the texts: 93 codes are missing from it, and they take the path of their longest prefix that the tree has.
