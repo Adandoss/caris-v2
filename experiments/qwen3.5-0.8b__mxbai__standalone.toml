@@ -1,0 +1,23 @@
+# Qwen 3.5 0.8B tags, matched against each code's own text with mxbai-embed-large.
+# Only [tagging].model differs from gemma4-26b__mxbai__standalone, for the model comparison.
+
+[data]
+split = "test"
+
+[tagging]
+model = "qwen3.5:0.8b"
+prompt = "tags_v1"
+schema = "tags_v1"
+temperature = 0.0
+seed = 42
+think = false
+
+[embedding]
+model = "mxbai-embed-large"
+text = "standalone"
+query_prefix = "Represent this sentence for searching relevant passages: "
+
+[selection]
+# Chosen on val, the best pooled F1 of caris sweep --split val: pooled precision 0.0469, recall 0.0427, 4.11 codes per image.
+top_k = 10
+threshold = 0.83

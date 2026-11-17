@@ -18,5 +18,6 @@ text = "hierarchical"
 query_prefix = "Represent this sentence for searching relevant passages: "
 
 [selection]
-top_k = 20
-# Add a threshold once it is chosen on val: caris sweep <this file> --split val
+# Chosen on val, the best pooled F1 of caris sweep --split val: pooled precision 0.0252, recall 0.022, 3.89 codes per image.
+top_k = 5
+threshold = 0.71

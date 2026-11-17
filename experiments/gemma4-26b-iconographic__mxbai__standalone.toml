@@ -1,0 +1,24 @@
+# Gemma 4 26B tags from a prompt that also asks for the iconographic subject, matched with mxbai-embed-large.
+# Only [tagging].prompt differs from gemma4-26b__mxbai__standalone: does asking for scenes and named figures
+# reach the branches tags_v1 never finds (5 to 9)?
+
+[data]
+split = "test"
+
+[tagging]
+model = "gemma4:26b"
+prompt = "tags_v2"
+schema = "tags_v1"
+temperature = 0.0
+seed = 42
+think = false  # reasoning before answering: much slower; compare it as its own experiment
+
+[embedding]
+model = "mxbai-embed-large"
+text = "standalone"
+query_prefix = "Represent this sentence for searching relevant passages: "
+
+[selection]
+# Chosen on val, the best pooled F1 of caris sweep --split val: pooled precision 0.0725, recall 0.0749, 4.6 codes per image.
+top_k = 5
+threshold = 0.78
