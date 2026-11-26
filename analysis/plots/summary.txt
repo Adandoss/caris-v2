@@ -1,0 +1,23 @@
+Źródło: https://iconclass.org/testset/779ba2ca9e977c58d818e3823a676973.zip
+Dzieła: 87 744 (z poprawnym kodem: 87 004)
+Przypisane kody: 391 368, unikalne: 34 707, średnio na dzieło: 4,50
+Dzieła z kodem z nawiasem: 49 529 (56,9%)
+Nazwa własna w nawiasie: 64 057
+Klucz (+…) doprecyzowujący: 57 418
+Kod złożony A:B: 25 202
+Podwojona litera (wariant): 11 672
+Nawias bez nazwy (...): 1 404
+Kody występujące raz: 20 525 (59,1% unikalnych)
+Brudne dane: 740 pustych kodów, 13 kodów spoza notacji: ['(AARON)', '.25H1(+1)', 'EVE)', 'H25L', 'IC 25D13(GOLD)', 'IC 25F6', 'J.J. VAN DER)1', 'Kardinal', 'Susanna en de ouderlingen', 'Willem V, prins van Oranje-Nassau', 'oude vrouw', 'plaatrand', 'x']
+
+Kategoria | kody | % kodów | dzieła | % dzieł | śr. długość
+0 Sztuka abstrakcyjna | 40 | 0,01% | 40 | 0,05% | 1,00
+1 Religia i magia | 22 779 | 5,8% | 13 606 | 15,6% | 4,92
+2 Natura | 67 902 | 17,3% | 29 676 | 34,1% | 4,70
+3 Człowiek | 70 054 | 17,9% | 31 936 | 36,7% | 5,99
+4 Społeczeństwo i kultura | 145 271 | 37,1% | 53 572 | 61,6% | 5,60
+5 Idee i pojęcia abstrakcyjne | 12 001 | 3,1% | 6 258 | 7,2% | 4,87
+6 Historia | 37 069 | 9,5% | 19 852 | 22,8% | 3,10
+7 Biblia | 15 629 | 4,0% | 10 230 | 11,8% | 5,30
+8 Literatura | 9 110 | 2,3% | 7 603 | 8,7% | 2,07
+9 Mitologia i starożytność | 11 513 | 2,9% | 6 351 | 7,3% | 4,73
