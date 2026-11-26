@@ -82,6 +82,11 @@ If the data lives anywhere other than `./data`, set `CARIS_DATA` to its folder.
 | `results/` | results files and sweeps | yes |
 | `cache/` | code indexes, tag embeddings, the Iconclass texts | no, rebuilt when needed |
 | `data/` | the dataset zip, the split, the val and test images | no |
+| `analysis/` | the dataset analysis script, its plots and `summary.txt` | yes |
+
+## Dataset analysis
+
+`python analysis/dataset_eda.py` writes 16 slide-sized plots (in Polish) and `summary.txt` to `analysis/plots/`: the Iconclass divisions, the notation extensions, code lengths, codes per artwork, the long tail, the source collections and the train/val/test split. Without an argument it reads `data/iconclass_dataset.zip`, or `data.json` straight from iconclass.org when the zip isn't there.
 
 ## Tests
 
